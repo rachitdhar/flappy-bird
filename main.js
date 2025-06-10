@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 // initializing all HTML elements
 const agent = document.createElement("div");
 agent.id = "agent";
@@ -14,6 +15,10 @@ const agent_left_init = 200;
 const agent_top_init = 200;
 let score = 0;
 const score_increment = 10;
+const current_time_hour = new Date().getHours();
+(_a = document.getElementById("body")) === null || _a === void 0 ? void 0 : _a.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
+    ? "background-color: rgb(1, 18, 45);"
+    : "background-color: rgb(156, 183, 233);");
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
 score_counter.setAttribute("style", "position: absolute; top: 40px; right: 100px; font-size: 40px; font-family: Arial, sans-serif; color: white; z-index: 100;");
 pause_status_lbl.setAttribute("style", "position: absolute; top: 40px; left: 100px; font-size: 40px; font-family: Arial, sans-serif; color: white; z-index: 100;");
