@@ -8,6 +8,7 @@ const pause_status_lbl = document.createElement("label");
 pause_status_lbl.id = "pause_status_lbl";
 const game_over_display = document.createElement("label");
 game_over_display.id = "game_over_display";
+const help_popup = document.getElementById("help-popup");
 const agent_size = 30;
 const agent_left_init = 200;
 const agent_top_init = 200;
@@ -28,6 +29,7 @@ document.body.appendChild(game_over_display);
 // universal controls
 let is_paused = false;
 let is_game_over = false;
+let show_help = false;
 // physics (taking downward direction as +ve y-axis)
 let agent_vy = 0;
 let agent_ay = 0;
@@ -123,9 +125,21 @@ function restart_game() {
 }
 // **************** Core *****************
 function handleUpKeyPress(key_code) {
-    let multiplier = (key_code === "KeyK") ? 1.33 : 1;
+    let multiplier = (key_code === "KeyK" || key_code === "Space") ? 1.33 : 1;
     agent_vy = multiplier * jump_vy;
     agent_ay = ay_gravity;
+}
+function toggleHelpPopup() {
+    if (!show_help) {
+        help_popup.setAttribute("style", "display: flex;");
+        is_paused = true;
+        show_help = true;
+    }
+    else {
+        help_popup.setAttribute("style", "display: none;");
+        is_paused = false;
+        show_help = false;
+    }
 }
 function handleTimeTick() {
     if (is_paused || is_game_over)
@@ -157,17 +171,28 @@ function handleKeyPress(e) {
         case 'KeyK':
             handleUpKeyPress(e.code);
             break;
-        case 'Space':
-            if (is_game_over) {
-                restart_game();
-            }
-            else {
+        case 'KeyP':
+            if (!is_game_over && !show_help) {
                 is_paused = !is_paused;
                 if (is_paused)
                     pause_status_lbl.textContent = "Paused";
                 else
                     pause_status_lbl.textContent = "";
             }
+            break;
+        case 'Space':
+            if (is_game_over) {
+                restart_game();
+            }
+            else {
+                handleUpKeyPress(e.code);
+            }
+            break;
+        case 'KeyH':
+            if (!is_game_over) {
+                toggleHelpPopup();
+            }
+            break;
         default: break;
     }
 }

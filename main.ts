@@ -4,6 +4,7 @@ const agent: HTMLDivElement = document.createElement("div"); agent.id = "agent";
 const score_counter: HTMLLabelElement = document.createElement("label"); score_counter.id = "score_counter";
 const pause_status_lbl: HTMLLabelElement = document.createElement("label"); pause_status_lbl.id = "pause_status_lbl";
 const game_over_display: HTMLLabelElement = document.createElement("label"); game_over_display.id = "game_over_display";
+const help_popup: HTMLDivElement = document.getElementById("help-popup") as HTMLDivElement;
 
 const agent_size: number = 30;
 const agent_left_init: number = 200;
@@ -30,6 +31,7 @@ document.body.appendChild(game_over_display);
 // universal controls
 let is_paused: boolean = false;
 let is_game_over: boolean = false;
+let show_help: boolean = false;
 
 // physics (taking downward direction as +ve y-axis)
 let agent_vy: number = 0;
@@ -149,10 +151,22 @@ function restart_game(): void {
 // **************** Core *****************
 
 function handleUpKeyPress(key_code: string): void {
-    let multiplier: number = (key_code === "KeyK") ? 1.33 : 1;
+    let multiplier: number = (key_code === "KeyK" || key_code === "Space") ? 1.33 : 1;
     
     agent_vy = multiplier * jump_vy;
     agent_ay = ay_gravity;
+}
+
+function toggleHelpPopup(): void {
+    if (!show_help) {
+        help_popup.setAttribute("style", "display: flex;");
+        is_paused = true;
+        show_help = true;
+    } else {
+        help_popup.setAttribute("style", "display: none;");
+        is_paused = false;
+        show_help = false;
+    }
 }
 
 function handleTimeTick(): void {
@@ -190,14 +204,25 @@ function handleKeyPress(e: KeyboardEvent) {
         case 'KeyK':
             handleUpKeyPress(e.code);
             break;
-        case 'Space':
-            if (is_game_over) {
-                restart_game();
-            } else {
+        case 'KeyP':
+            if (!is_game_over && !show_help) {
                 is_paused = !is_paused;
                 if (is_paused) pause_status_lbl.textContent = "Paused";
                 else pause_status_lbl.textContent = "";
             }
+            break;
+        case 'Space':
+            if (is_game_over) {
+                restart_game();
+            } else {
+                handleUpKeyPress(e.code);
+            }
+            break;
+        case 'KeyH':
+            if (!is_game_over) {
+                toggleHelpPopup();
+            }
+            break;
         default: break;
     }
 }
