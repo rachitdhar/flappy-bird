@@ -135,6 +135,8 @@ function restart_game(): void {
     last_used_entity_id = 0;
 
     agent.style.top = pixel_str(agent_top_init);
+    agent_ay = 0;
+    agent_vy = 0;
     score = 0;
     score_counter.textContent = `Score: ${score}`;
 
@@ -157,6 +159,10 @@ function handleTimeTick(): void {
 
     agent_vy += agent_ay;
     agent.style.top = pixel_str(pixel_val(agent.style.top) + agent_vy);
+
+    if (pixel_val(agent.style.top) >= window.innerHeight) {
+        set_gameover();
+    }
 }
 
 // handling elapsed time
