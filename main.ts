@@ -17,7 +17,7 @@ document.getElementById("body")?.setAttribute(
     "style",
     (current_time_hour <= 6 || current_time_hour >= 18)
     ? "background-color: rgb(1, 18, 45);"
-    : "background-color: rgb(156, 183, 233);"
+    : "background-color: rgb(156, 219, 233);"
 );
 
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
