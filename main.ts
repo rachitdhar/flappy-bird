@@ -35,8 +35,8 @@ let is_game_over: boolean = false;
 let agent_vy: number = 0;
 let agent_ay: number = 0;
 const ay_gravity: number = 2;
-const terminal_speed: number = 20;
-let jump_vy: number = -20;
+const terminal_speed: number = 30;
+let jump_vy: number = -15;
 
 // entities
 const min_obstacle_gap: number = 100;
@@ -148,8 +148,10 @@ function restart_game(): void {
 
 // **************** Core *****************
 
-function handleUpKeyPress(): void {    
-    agent_vy = jump_vy;
+function handleUpKeyPress(key_code: string): void {
+    let multiplier: number = (key_code === "KeyK") ? 1.33 : 1;
+    
+    agent_vy = multiplier * jump_vy;
     agent_ay = ay_gravity;
 }
 
@@ -184,7 +186,9 @@ function set_gameover(): void {
 function handleKeyPress(e: KeyboardEvent) {
     switch (e.code) {
         case 'ArrowUp':
-            handleUpKeyPress();
+        case 'KeyJ':
+        case 'KeyK':
+            handleUpKeyPress(e.code);
             break;
         case 'Space':
             if (is_game_over) {

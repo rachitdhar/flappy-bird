@@ -32,8 +32,8 @@ let is_game_over = false;
 let agent_vy = 0;
 let agent_ay = 0;
 const ay_gravity = 2;
-const terminal_speed = 20;
-let jump_vy = -20;
+const terminal_speed = 30;
+let jump_vy = -15;
 // entities
 const min_obstacle_gap = 100;
 const max_obstacle_gap = 200;
@@ -122,8 +122,9 @@ function restart_game() {
     is_paused = false;
 }
 // **************** Core *****************
-function handleUpKeyPress() {
-    agent_vy = jump_vy;
+function handleUpKeyPress(key_code) {
+    let multiplier = (key_code === "KeyK") ? 1.33 : 1;
+    agent_vy = multiplier * jump_vy;
     agent_ay = ay_gravity;
 }
 function handleTimeTick() {
@@ -152,7 +153,9 @@ function set_gameover() {
 function handleKeyPress(e) {
     switch (e.code) {
         case 'ArrowUp':
-            handleUpKeyPress();
+        case 'KeyJ':
+        case 'KeyK':
+            handleUpKeyPress(e.code);
             break;
         case 'Space':
             if (is_game_over) {
