@@ -32,7 +32,8 @@ let is_game_over = false;
 let agent_vy = 0;
 let agent_ay = 0;
 const ay_gravity = 2;
-let jump_vy = -15;
+const terminal_speed = 20;
+let jump_vy = -20;
 // entities
 const min_obstacle_gap = 100;
 const max_obstacle_gap = 200;
@@ -129,7 +130,9 @@ function handleTimeTick() {
     if (is_paused || is_game_over)
         return;
     handleEntities();
-    agent_vy += agent_ay;
+    if (agent_vy < terminal_speed) {
+        agent_vy += agent_ay;
+    }
     agent.style.top = pixel_str(pixel_val(agent.style.top) + agent_vy);
     if (pixel_val(agent.style.top) >= window.innerHeight) {
         set_gameover();
