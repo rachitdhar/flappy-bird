@@ -64,7 +64,7 @@ const max_obstacle_gap: number = 200;
 const pipe_width: number = 50;
 const min_pipe_height: number = 50;
 
-let pipes_per_level: number = 2;   // the number of pipes that must cross the left edge of the screen
+let pipes_per_level: number = 20;   // the number of pipes that must cross the left edge of the screen
 let pipes_crossed: number = 0;
 
 let entity_vx: number = -15;
