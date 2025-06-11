@@ -26,3 +26,9 @@ Alternatively, you can just compile each time using:
 ```
 npx tsc
 ```
+
+To run on localhost:
+
+```
+npx serve
+```
