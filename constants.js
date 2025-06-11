@@ -5,6 +5,7 @@ export var Colors;
     Colors["SKY_BLUE"] = "rgb(156, 219, 233)";
     Colors["NIGHT_BLUE"] = "rgb(1, 18, 45)";
     Colors["OVERLAY_DARK"] = "rgba(0,0,0,0.5)";
+    Colors["BLUE"] = "rgb(63, 175, 239)";
     Colors["BLACK"] = "rgb(0, 0, 0)";
 })(Colors || (Colors = {}));
 ;
@@ -17,8 +18,8 @@ export const LevelDesignMap = {
     },
     "W12": {
         bg_image: "url('resources/cave_bg.png')",
-        bg_night_image: "url('resources/cave_bg_bg.png')",
-        pipe_color: Colors.GREEN
+        bg_night_image: "url('resources/cave_bg.png')",
+        pipe_color: Colors.BLUE
     },
     "W13": {
         pipe_color: Colors.GREEN

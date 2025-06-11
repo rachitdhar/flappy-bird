@@ -3,11 +3,18 @@
     <head>
         <meta charset="UTF-8">
         <title>Flappy Bird</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
         <style>
             body {
                 overflow: hidden;
-                background-size: cover;
-                height: 100vh;
+                background-repeat: repeat-x;
+                background-size: auto 100vh;
+                background-position: left top;
+                font-family: "Press Start 2P", system-ui;
+                font-weight: 400;
+                font-style: normal;
             }
 
             .overlay {
@@ -24,11 +31,10 @@
             }
 
             .help-popup {
-                width: 400px;
+                width: 500px;
                 height: 250px;
                 background: rgba(0, 0, 0, 0.69);
                 color: white;
-                font-family: Arial, sans-serif;
                 padding: 20px;
                 box-sizing: border-box;
                 border-radius: 10px;
@@ -39,7 +45,7 @@
             .help-popup h2 {
                 margin-top: 0;
                 text-align: center;
-                font-size: 30px;
+                font-size: 20px;
             }
 
             .help-content {
@@ -47,7 +53,7 @@
                 display: flex;
                 justify-content: space-between;
                 margin-top: 10px;
-                font-size: 16px;
+                font-size: 10px;
             }
 
             .help-column {
@@ -64,11 +70,13 @@
     <body id="body">
         <div id="help-popup" class="overlay">
             <div class="help-popup">
-                <h2>Flappy Bird: Help Menu</h2>
+                <h2>Help Menu</h2>
                 <div class="help-content">
                     <ul class="help-column">
                         <li>J Key / Up Arrow Key</li>
                         <li>K Key / Spacebar</li>
+                        <li>D Key / Left Arrow Key</li>
+                        <li>F Key / Right Arrow Key</li>
                         <li>P Key</li>
                         <li>H Key</li>
                         <li>Spacebar</li>
@@ -76,6 +84,8 @@
                     <ul class="help-column">
                         <li>Short Jump</li>
                         <li>Long Jump</li>
+                        <li>Move Left</li>
+                        <li>Move Right</li>
                         <li>Pause / Play</li>
                         <li>Toggle Help Popup</li>
                         <li>Restart Game</li>
