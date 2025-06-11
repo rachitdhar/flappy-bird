@@ -1,5 +1,5 @@
-"use strict";
 var _a;
+import { Colors } from "./constants.js";
 // initializing all HTML elements
 const agent = document.createElement("div");
 agent.id = "agent";
@@ -17,12 +17,12 @@ let score = 0;
 const score_increment = 10;
 const current_time_hour = new Date().getHours();
 (_a = document.getElementById("body")) === null || _a === void 0 ? void 0 : _a.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
-    ? "background-color: rgb(1, 18, 45);"
-    : "background-color: rgb(156, 219, 233);");
+    ? `background-color: ${Colors.NIGHT_BLUE};`
+    : `background-color: ${Colors.SKY_BLUE};`);
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
-score_counter.setAttribute("style", "position: absolute; top: 40px; right: 100px; font-size: 40px; font-family: Arial, sans-serif; color: white; z-index: 100;");
-pause_status_lbl.setAttribute("style", "position: absolute; top: 40px; left: 100px; font-size: 40px; font-family: Arial, sans-serif; color: white; z-index: 100;");
-game_over_display.setAttribute("style", "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.3); color: white; font-size: 80px; font-weight: 600; font-family: Arial, sans-serif; z-index: 9999;");
+score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 40px; font-family: Arial, sans-serif; color: ${Colors.WHITE}; z-index: 100;`);
+pause_status_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; font-size: 40px; font-family: Arial, sans-serif; color: ${Colors.WHITE}; z-index: 100;`);
+game_over_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background: ${Colors.OVERLAY_DARK}; color: white; font-size: 80px; font-weight: 600; font-family: Arial, sans-serif; z-index: 9999;`);
 score_counter.textContent = "Score: 0";
 pause_status_lbl.textContent = "";
 game_over_display.textContent = "GAME OVER";
@@ -85,8 +85,8 @@ function create_obstacle() {
     let window_height = window.innerHeight;
     let gap = rand_int(min_obstacle_gap, max_obstacle_gap);
     let bp_top = rand_int(min_pipe_height + gap, window_height - min_pipe_height);
-    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color:rgb(36, 193, 22);`);
-    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: rgb(36, 193, 22);`);
+    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
+    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
     bottom_pipe.setAttribute("pipe_type", "bottom");
     top_pipe.setAttribute("pipe_type", "top");
     document.body.appendChild(bottom_pipe);
