@@ -8,3 +8,22 @@ export var Colors;
     Colors["BLACK"] = "rgb(0, 0, 0)";
 })(Colors || (Colors = {}));
 ;
+export const LevelDesignMap = {
+    // ****** WORLD 1 ******
+    "W11": {
+        bg_image: "url('resources/mountain_sky_bg.png')",
+        bg_night_image: "url('resources/mountain_sky_night_bg.png')",
+        pipe_color: Colors.GREEN
+    },
+    "W12": {
+        bg_image: "url('resources/cave_bg.png')",
+        bg_night_image: "url('resources/cave_bg_bg.png')",
+        pipe_color: Colors.GREEN
+    },
+    "W13": {
+        pipe_color: Colors.GREEN
+    },
+    "W14": {
+        pipe_color: Colors.GREEN
+    }
+};

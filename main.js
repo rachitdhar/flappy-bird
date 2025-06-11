@@ -1,5 +1,4 @@
-var _a;
-import { Colors } from "./constants.js";
+import { Colors, LevelDesignMap } from "./constants.js";
 // initializing all HTML elements
 const agent = document.createElement("div");
 agent.id = "agent";
@@ -16,9 +15,9 @@ const agent_top_init = 200;
 let score = 0;
 const score_increment = 10;
 const current_time_hour = new Date().getHours();
-(_a = document.getElementById("body")) === null || _a === void 0 ? void 0 : _a.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
-    ? `background-color: ${Colors.NIGHT_BLUE};`
-    : `background-color: ${Colors.SKY_BLUE};`);
+let world = 1;
+let level = 1;
+let level_props = {};
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
 score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 40px; font-family: Arial, sans-serif; color: ${Colors.WHITE}; z-index: 100;`);
 pause_status_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; font-size: 40px; font-family: Arial, sans-serif; color: ${Colors.WHITE}; z-index: 100;`);
@@ -49,6 +48,14 @@ const min_pipe_height = 50;
 const entity_vx = -15;
 let last_used_entity_id = 0;
 let temporary_entity_ids = [];
+function initializeLevel() {
+    var _a;
+    let level_code = `W${world}${level}`;
+    level_props = LevelDesignMap[level_code];
+    (_a = document.getElementById("body")) === null || _a === void 0 ? void 0 : _a.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
+        ? `background-image: ${level_props.bg_night_image};`
+        : `background-image: ${level_props.bg_image};`);
+}
 function handleEntities() {
     temporary_entity_ids.forEach((id) => {
         const entity = document.getElementById(id);
@@ -85,8 +92,8 @@ function create_obstacle() {
     let window_height = window.innerHeight;
     let gap = rand_int(min_obstacle_gap, max_obstacle_gap);
     let bp_top = rand_int(min_pipe_height + gap, window_height - min_pipe_height);
-    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
-    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
+    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color: ${level_props.pipe_color};`);
+    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: ${level_props.pipe_color};`);
     bottom_pipe.setAttribute("pipe_type", "bottom");
     top_pipe.setAttribute("pipe_type", "top");
     document.body.appendChild(bottom_pipe);
@@ -202,8 +209,6 @@ function handleKeyPress(e) {
     }
 }
 document.addEventListener("keydown", (e) => handleKeyPress(e));
-setInterval(handleClockTick, 1000); // creating timer for time elapsed clock
-setInterval(handleTimeTick, 50); // creating universal timer for game
 // ****************** Helper ********************
 function pixel_val(data) {
     let val = data.slice(0, data.indexOf("px"));
@@ -216,3 +221,7 @@ function pixel_str(data) {
 function rand_int(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
+// ***********************************************
+initializeLevel();
+setInterval(handleClockTick, 1000); // creating timer for time elapsed clock
+setInterval(handleTimeTick, 50); // creating universal timer for game

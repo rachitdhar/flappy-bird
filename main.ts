@@ -1,4 +1,4 @@
-import { Colors } from "./constants.js";
+import { Colors, LevelProperties, LevelDesignMap } from "./constants.js";
 
 // initializing all HTML elements
 const agent: HTMLDivElement = document.createElement("div"); agent.id = "agent";
@@ -12,14 +12,11 @@ const agent_left_init: number = 200;
 const agent_top_init: number = 200;
 let score: number = 0;
 const score_increment: number = 10;
-
 const current_time_hour: number = new Date().getHours();
-document.getElementById("body")?.setAttribute(
-    "style",
-    (current_time_hour <= 6 || current_time_hour >= 18)
-    ? `background-color: ${Colors.NIGHT_BLUE};`
-    : `background-color: ${Colors.SKY_BLUE};`
-);
+
+let world: number = 1;
+let level: number = 1;
+let level_props: LevelProperties = {};
 
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
 score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 40px; font-family: Arial, sans-serif; color: ${Colors.WHITE}; z-index: 100;`);
@@ -58,6 +55,18 @@ const min_pipe_height: number = 50;
 const entity_vx: number = -15;
 let last_used_entity_id: number = 0;
 let temporary_entity_ids: string[] = [];
+
+function initializeLevel(): void {
+    let level_code: string = `W${world}${level}`;
+    level_props = LevelDesignMap[level_code];
+
+    document.getElementById("body")?.setAttribute(
+        "style",
+        (current_time_hour <= 6 || current_time_hour >= 18)
+        ? `background-image: ${level_props.bg_night_image};`
+        : `background-image: ${level_props.bg_image};`
+    );
+}
 
 function handleEntities(): void {
     temporary_entity_ids.forEach((id: string) => {
@@ -108,8 +117,8 @@ function create_obstacle(): void {
     let gap: number = rand_int(min_obstacle_gap, max_obstacle_gap);
     let bp_top: number = rand_int(min_pipe_height + gap, window_height - min_pipe_height);
 
-    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
-    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: ${Colors.GREEN};`);
+    bottom_pipe.setAttribute("style", `position: absolute; top: ${bp_top}px; left: ${window_width}px; height: ${window_height - bp_top}px; width: ${pipe_width}px; background-color: ${level_props.pipe_color};`);
+    top_pipe.setAttribute("style", `position: absolute; top: 0px; left: ${window_width}px; height: ${bp_top - gap}px; width: ${pipe_width}px; background-color: ${level_props.pipe_color};`);
     bottom_pipe.setAttribute("pipe_type", "bottom");
     top_pipe.setAttribute("pipe_type", "top");
 
@@ -237,9 +246,6 @@ function handleKeyPress(e: KeyboardEvent) {
 }
 document.addEventListener("keydown", (e: KeyboardEvent) => handleKeyPress(e));
 
-setInterval(handleClockTick, 1000);     // creating timer for time elapsed clock
-setInterval(handleTimeTick, 50);        // creating universal timer for game
-
 // ****************** Helper ********************
 
 function pixel_val(data: string): number {
@@ -255,3 +261,9 @@ function pixel_str(data: number): string {
 function rand_int(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+// ***********************************************
+
+initializeLevel();
+setInterval(handleClockTick, 1000);     // creating timer for time elapsed clock
+setInterval(handleTimeTick, 50);        // creating universal timer for game
