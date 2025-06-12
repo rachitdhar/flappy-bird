@@ -65,6 +65,38 @@
             .help-column li {
                 margin-bottom: 8px;
             }
+
+            .lives-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                background-color: black;
+                color: white;
+                width: 100%;
+                height: 100%;
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+            .lives-content {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            .lives-counter {
+                font-size: 20px;
+                transition: opacity 0.5s ease;
+                opacity: 1;
+            }
+            .fade-out {
+                opacity: 0;
+            }
+            .agent-icon {
+                width: 30px;
+                height: 30px;
+                background-color: rgb(156, 7, 7);
+            }
         </style>
     </head>
     <body id="body">
@@ -91,6 +123,12 @@
                         <li>Restart Game</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+        <div id="lives-display" class="lives-container">
+            <div class="lives-content">
+                <div class="agent-icon"></div>
+                <label id="lives-counter" class="lives-counter"></label>
             </div>
         </div>
         <script type="module" src="main.js"></script>
