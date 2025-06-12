@@ -11,11 +11,14 @@ const help_popup: HTMLDivElement = document.getElementById("help-popup") as HTML
 const lives_display: HTMLDivElement = document.getElementById("lives-display") as HTMLDivElement;
 const lives_counter: HTMLLabelElement = document.getElementById("lives-counter") as HTMLLabelElement;
 const lives_lbl: HTMLLabelElement = document.createElement("label"); lives_lbl.id = "lives_lbl";
+const time_counter: HTMLLabelElement = document.createElement("label"); time_counter.id = "time_counter";
 
 const agent_size: number = 30;
 const agent_left_init: number = 200;
 const agent_top_init: number = 200;
 let score: number = 0;
+let time_remaining: number = 300;
+const time_init: number = 300;
 const score_increment: number = 10;
 const current_time_hour: number = new Date().getHours();
 
@@ -27,12 +30,13 @@ let lives_remaining: number = 5;
 let level_props: LevelProperties = {};
 
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:rgb(156, 7, 7);`);
-score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
+score_counter.setAttribute("style", `position: absolute; top: 40px; right: 250px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
 world_level_lbl.setAttribute("style", `position: absolute; top: 40px; left: 50%; display: block; text-align: center; transform: translateX(-50%); font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 pause_status_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 game_over_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background: ${Colors.OVERLAY_DARK}; color: white; font-size: 40px; font-weight: 600; z-index: 9999;`);
 next_level_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; text-align: center; justify-content: center; align-items: center; background-color: ${Colors.BLACK}; color: white; font-size: 20px; font-weight: 600; z-index: 9999;`);
 lives_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; display: block; text-align: center; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
+time_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
 
 score_counter.innerHTML = "Score<br>0";
 lives_lbl.innerHTML = `Lives<br>${lives_remaining}`;
@@ -41,6 +45,7 @@ pause_status_lbl.textContent = "";
 game_over_display.textContent = "GAME OVER";
 next_level_display.innerHTML = `World ${world}-${level}`;
 lives_counter.textContent = `x ${lives_remaining}`;
+time_counter.innerHTML = `Time<br>${time_remaining}`;
 
 document.body.appendChild(agent);
 document.body.appendChild(score_counter);
@@ -49,6 +54,7 @@ document.body.appendChild(pause_status_lbl);
 document.body.appendChild(game_over_display);
 document.body.appendChild(next_level_display);
 document.body.appendChild(lives_lbl);
+document.body.appendChild(time_counter);
 
 // **************** Game *****************
 
@@ -83,6 +89,8 @@ let temporary_entity_ids: string[] = [];
 function initializeLevel(show_world_number_at_start: boolean = true): void {
     let level_code: string = `W${world}${level}`;
     level_props = LevelDesignMap[level_code];
+    time_remaining = time_init;
+    time_counter.innerHTML = `Time<br>${time_remaining}`;
 
     document.getElementById("body")?.setAttribute(
         "style",
@@ -277,7 +285,7 @@ function handleTimeTick(): void {
         agent.style.left = pixel_str(pixel_val(agent.style.left) + agent_vx);
     }
 
-    if (pixel_val(agent.style.top) >= window.innerHeight) {
+    if (time_remaining <= 0 || pixel_val(agent.style.top) >= window.innerHeight) {
         set_gameover();
     }
     if (pixel_val(agent.style.left) >= window.innerWidth) {
@@ -293,9 +301,13 @@ function handleTimeTick(): void {
 
 // handling elapsed time
 function handleClockTick(): void {
-    if (is_paused || is_game_over || entity_vx === 0) return;
+    if (is_paused || is_game_over) return;
+    time_remaining--;
+    time_counter.innerHTML = `Time<br>${time_remaining}`;
 
-    create_obstacle();
+    if (entity_vx !== 0) {
+        create_obstacle();
+    }
 }
 
 function set_gameover(): void {
