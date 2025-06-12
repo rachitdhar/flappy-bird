@@ -8,6 +8,9 @@ const pause_status_lbl: HTMLLabelElement = document.createElement("label"); paus
 const game_over_display: HTMLLabelElement = document.createElement("label"); game_over_display.id = "game_over_display";
 const next_level_display: HTMLLabelElement = document.createElement("label"); next_level_display.id = "next_level_display";
 const help_popup: HTMLDivElement = document.getElementById("help-popup") as HTMLDivElement;
+const lives_display: HTMLDivElement = document.getElementById("lives-display") as HTMLDivElement;
+const lives_counter: HTMLLabelElement = document.getElementById("lives-counter") as HTMLLabelElement;
+const lives_lbl: HTMLLabelElement = document.createElement("label"); lives_lbl.id = "lives_lbl";
 
 const agent_size: number = 30;
 const agent_left_init: number = 200;
@@ -19,20 +22,25 @@ const current_time_hour: number = new Date().getHours();
 let world: number = 1;
 let level: number = 1;
 const last_world: number = 1;
+const lives_init: number = 5;
+let lives_remaining: number = 5;
 let level_props: LevelProperties = {};
 
-agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:#9c0707;`);
-score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
-world_level_lbl.setAttribute("style", `position: absolute; top: 40px; left: 50%; transform: translateX(-50%); font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
+agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:rgb(156, 7, 7);`);
+score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
+world_level_lbl.setAttribute("style", `position: absolute; top: 40px; left: 50%; display: block; text-align: center; transform: translateX(-50%); font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 pause_status_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 game_over_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background: ${Colors.OVERLAY_DARK}; color: white; font-size: 40px; font-weight: 600; z-index: 9999;`);
-next_level_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background-color: ${Colors.BLACK}; color: white; font-size: 20px; font-weight: 600; z-index: 9999;`);
+next_level_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; text-align: center; justify-content: center; align-items: center; background-color: ${Colors.BLACK}; color: white; font-size: 20px; font-weight: 600; z-index: 9999;`);
+lives_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; display: block; text-align: center; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 
-score_counter.textContent = "Score: 0";
-world_level_lbl.textContent = `World ${world}-${level}`;
+score_counter.innerHTML = "Score<br>0";
+lives_lbl.innerHTML = `Lives<br>${lives_remaining}`;
+world_level_lbl.innerHTML = `World<br>${world}-${level}`;
 pause_status_lbl.textContent = "";
 game_over_display.textContent = "GAME OVER";
-next_level_display.textContent = `World ${world}-${level}`;
+next_level_display.innerHTML = `World ${world}-${level}`;
+lives_counter.textContent = `x ${lives_remaining}`;
 
 document.body.appendChild(agent);
 document.body.appendChild(score_counter);
@@ -40,6 +48,7 @@ document.body.appendChild(world_level_lbl);
 document.body.appendChild(pause_status_lbl);
 document.body.appendChild(game_over_display);
 document.body.appendChild(next_level_display);
+document.body.appendChild(lives_lbl);
 
 // **************** Game *****************
 
@@ -71,7 +80,7 @@ let entity_vx: number = -15;
 let last_used_entity_id: number = 0;
 let temporary_entity_ids: string[] = [];
 
-function initializeLevel(): void {
+function initializeLevel(show_world_number_at_start: boolean = true): void {
     let level_code: string = `W${world}${level}`;
     level_props = LevelDesignMap[level_code];
 
@@ -81,7 +90,7 @@ function initializeLevel(): void {
         ? `background-image: ${level_props.bg_night_image};`
         : `background-image: ${level_props.bg_image};`
     );
-    world_level_lbl.textContent = `World ${world}-${level}`;
+    world_level_lbl.innerHTML = `World<br>${world}-${level}`;
 
     temporary_entity_ids.forEach((id: string) => {
         const entity = document.getElementById(id);
@@ -98,7 +107,7 @@ function initializeLevel(): void {
     agent_ay = 0;
     agent_vy = 0;
 
-    if (!(world === 1 && level === 1)) {
+    if (show_world_number_at_start && !(world === 1 && level === 1)) {
         is_paused = true;
         next_level_display.textContent = `World ${world}-${level}`;
         next_level_display.style.display = "flex";
@@ -205,7 +214,7 @@ function destroy_entity(id: string): void {
     if (entity) {
         if (entity.getAttribute("pipe_type") === "bottom") {
             score += score_increment;
-            score_counter.textContent = `Score: ${score}`;
+            score_counter.innerHTML = `Score<br>${score}`;
         }
         entity.remove();
     }
@@ -218,9 +227,12 @@ function restart_game(): void {
     world = 1;
     level = 1;
     pipes_per_level = 20;
+    lives_remaining = lives_init;
+    lives_lbl.innerHTML = `Lives<br>${lives_remaining}`;
+    lives_counter.textContent = `x ${lives_remaining}`;
     initializeLevel();
     score = 0;
-    score_counter.textContent = `Score: ${score}`;
+    score_counter.innerHTML = `Score<br>${score}`;
 
     game_over_display.style.display = "none";
     is_game_over = false;
@@ -287,6 +299,22 @@ function handleClockTick(): void {
 }
 
 function set_gameover(): void {
+    if (lives_remaining > 0) {
+        initializeLevel(false);
+        
+        is_paused = true;
+        lives_display.style.display = "flex";
+        lives_remaining--;
+        lives_lbl.innerHTML = `Lives<br>${lives_remaining}`;
+        setTimeout(() => transition_text(lives_counter, `x ${lives_remaining}`), 750);
+
+        setTimeout(() => {
+            lives_display.style.display = "none";
+            is_paused = false;
+        }, 2000);
+        return;
+    }
+
     is_game_over = true;
     game_over_display.style.display = "flex";
 }
@@ -312,8 +340,14 @@ function handleKeyPress(e: KeyboardEvent) {
         case 'KeyP':
             if (!is_game_over && !show_help) {
                 is_paused = !is_paused;
-                if (is_paused) pause_status_lbl.textContent = "Paused";
-                else pause_status_lbl.textContent = "";
+                if (is_paused) {
+                    pause_status_lbl.textContent = "Paused";
+                    lives_lbl.style.display = "none";
+                }
+                else {
+                    pause_status_lbl.textContent = "";
+                    lives_lbl.style.display = "block";
+                }
             }
             break;
         case 'Space':
@@ -357,6 +391,15 @@ function pixel_str(data: number): string {
 // generate random integer betweeen min and max (min and max included)
 function rand_int(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function transition_text(element: HTMLElement, new_text: string, duration: number = 200) {
+    element.classList.add("fade-out");
+
+    setTimeout(() => {
+        element.textContent = new_text;
+        element.classList.remove("fade-out");
+    }, duration);
 }
 
 // ***********************************************
