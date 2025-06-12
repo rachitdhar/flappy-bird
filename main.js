@@ -17,10 +17,14 @@ const lives_display = document.getElementById("lives-display");
 const lives_counter = document.getElementById("lives-counter");
 const lives_lbl = document.createElement("label");
 lives_lbl.id = "lives_lbl";
+const time_counter = document.createElement("label");
+time_counter.id = "time_counter";
 const agent_size = 30;
 const agent_left_init = 200;
 const agent_top_init = 200;
 let score = 0;
+let time_remaining = 300;
+const time_init = 300;
 const score_increment = 10;
 const current_time_hour = new Date().getHours();
 let world = 1;
@@ -30,12 +34,13 @@ const lives_init = 5;
 let lives_remaining = 5;
 let level_props = {};
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:rgb(156, 7, 7);`);
-score_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
+score_counter.setAttribute("style", `position: absolute; top: 40px; right: 250px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
 world_level_lbl.setAttribute("style", `position: absolute; top: 40px; left: 50%; display: block; text-align: center; transform: translateX(-50%); font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 pause_status_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
 game_over_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; justify-content: center; align-items: center; background: ${Colors.OVERLAY_DARK}; color: white; font-size: 40px; font-weight: 600; z-index: 9999;`);
 next_level_display.setAttribute("style", `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: none; text-align: center; justify-content: center; align-items: center; background-color: ${Colors.BLACK}; color: white; font-size: 20px; font-weight: 600; z-index: 9999;`);
 lives_lbl.setAttribute("style", `position: absolute; top: 40px; left: 100px; display: block; text-align: center; font-size: 20px; color: ${Colors.WHITE}; z-index: 100;`);
+time_counter.setAttribute("style", `position: absolute; top: 40px; right: 100px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
 score_counter.innerHTML = "Score<br>0";
 lives_lbl.innerHTML = `Lives<br>${lives_remaining}`;
 world_level_lbl.innerHTML = `World<br>${world}-${level}`;
@@ -43,6 +48,7 @@ pause_status_lbl.textContent = "";
 game_over_display.textContent = "GAME OVER";
 next_level_display.innerHTML = `World ${world}-${level}`;
 lives_counter.textContent = `x ${lives_remaining}`;
+time_counter.innerHTML = `Time<br>${time_remaining}`;
 document.body.appendChild(agent);
 document.body.appendChild(score_counter);
 document.body.appendChild(world_level_lbl);
@@ -50,6 +56,7 @@ document.body.appendChild(pause_status_lbl);
 document.body.appendChild(game_over_display);
 document.body.appendChild(next_level_display);
 document.body.appendChild(lives_lbl);
+document.body.appendChild(time_counter);
 // **************** Game *****************
 // universal controls
 let is_paused = false;
@@ -77,6 +84,8 @@ function initializeLevel(show_world_number_at_start = true) {
     var _a;
     let level_code = `W${world}${level}`;
     level_props = LevelDesignMap[level_code];
+    time_remaining = time_init;
+    time_counter.innerHTML = `Time<br>${time_remaining}`;
     (_a = document.getElementById("body")) === null || _a === void 0 ? void 0 : _a.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
         ? `background-image: ${level_props.bg_night_image};`
         : `background-image: ${level_props.bg_image};`);
@@ -235,7 +244,7 @@ function handleTimeTick() {
     if (agent_vx > 0 || (agent_vx < 0 && pixel_val(agent.style.left) > 0)) {
         agent.style.left = pixel_str(pixel_val(agent.style.left) + agent_vx);
     }
-    if (pixel_val(agent.style.top) >= window.innerHeight) {
+    if (time_remaining <= 0 || pixel_val(agent.style.top) >= window.innerHeight) {
         set_gameover();
     }
     if (pixel_val(agent.style.left) >= window.innerWidth) {
@@ -251,9 +260,13 @@ function handleTimeTick() {
 }
 // handling elapsed time
 function handleClockTick() {
-    if (is_paused || is_game_over || entity_vx === 0)
+    if (is_paused || is_game_over)
         return;
-    create_obstacle();
+    time_remaining--;
+    time_counter.innerHTML = `Time<br>${time_remaining}`;
+    if (entity_vx !== 0) {
+        create_obstacle();
+    }
 }
 function set_gameover() {
     if (lives_remaining > 0) {
