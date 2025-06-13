@@ -25,7 +25,7 @@ const current_time_hour: number = new Date().getHours();
 
 let world: number = 1;
 let level: number = 1;
-const last_world: number = 1;
+const last_world: number = 4;
 const lives_init: number = 5;
 let lives_remaining: number = 5;
 let level_props: LevelProperties = LevelDesignMap["W11"];
@@ -51,8 +51,8 @@ time_counter.innerHTML = `Time<br>${time_remaining}`;
 body?.setAttribute(
     "style",
     (current_time_hour <= 6 || current_time_hour >= 18)
-    ? `background-image: ${level_props.bg_night_image};`
-    : `background-image: ${level_props.bg_image};`
+    ? `background-color: ${level_props.bg_night_color};`
+    : `background-color: ${level_props.bg_color};`
 );
 
 document.body.appendChild(agent);
@@ -102,8 +102,8 @@ function initializeLevel(show_world_number_at_start: boolean = true): void {
     body?.setAttribute(
         "style",
         (current_time_hour <= 6 || current_time_hour >= 18)
-        ? `background-image: ${level_props.bg_night_image};`
-        : `background-image: ${level_props.bg_image};`
+        ? `background-color: ${level_props.bg_night_color};`
+        : `background-color: ${level_props.bg_color};`
     );
     world_level_lbl.innerHTML = `World<br>${world}-${level}`;
 
@@ -307,6 +307,7 @@ function restart_game(): void {
     score_counter.innerHTML = `Score<br>${score}`;
 
     game_over_display.style.display = "none";
+    game_over_display.textContent = "GAME OVER";
     is_game_over = false;
     is_paused = false;
 }
@@ -356,13 +357,15 @@ function handleTimeTick(): void {
         set_gameover();
     }
     if (pixel_val(agent.style.left) >= window.innerWidth) {
-        if (level < 4) level++;
-        else if (world < last_world) {
+        if (level < 4) {
+            level++;
+            initializeLevel();
+        } else if (world < last_world) {
             world++;
-            pipes_per_level = world * 20;
+            pipes_per_level = 20 + (world * 5);
             level = 1;
-        }
-        initializeLevel();
+            initializeLevel();
+        } else set_gameover(true);
     }
 }
 
@@ -373,8 +376,8 @@ function handleClockTick(): void {
     time_counter.innerHTML = `Time<br>${time_remaining}`;
 }
 
-function set_gameover(): void {
-    if (lives_remaining > 0) {
+function set_gameover(has_won: boolean = false): void {
+    if (lives_remaining > 0 && !has_won) {
         initializeLevel(false);
         
         is_paused = true;
@@ -390,6 +393,9 @@ function set_gameover(): void {
         return;
     }
 
+    if (has_won) {
+        game_over_display.textContent = "YOU WIN!";
+    }
     is_game_over = true;
     game_over_display.style.display = "flex";
 }
