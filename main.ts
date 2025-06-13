@@ -10,6 +10,7 @@ const next_level_display: HTMLLabelElement = document.createElement("label"); ne
 const help_popup: HTMLDivElement = document.getElementById("help-popup") as HTMLDivElement;
 const lives_display: HTMLDivElement = document.getElementById("lives-display") as HTMLDivElement;
 const lives_counter: HTMLLabelElement = document.getElementById("lives-counter") as HTMLLabelElement;
+const body: HTMLBodyElement = document.getElementById("body") as HTMLBodyElement;
 const lives_lbl: HTMLLabelElement = document.createElement("label"); lives_lbl.id = "lives_lbl";
 const time_counter: HTMLLabelElement = document.createElement("label"); time_counter.id = "time_counter";
 
@@ -27,7 +28,7 @@ let level: number = 1;
 const last_world: number = 1;
 const lives_init: number = 5;
 let lives_remaining: number = 5;
-let level_props: LevelProperties = {};
+let level_props: LevelProperties = LevelDesignMap["W11"];
 
 agent.setAttribute("style", `position: absolute; top: ${agent_top_init}px; left: ${agent_left_init}px; width: ${agent_size}px; height: ${agent_size}px; background-color:rgb(156, 7, 7);`);
 score_counter.setAttribute("style", `position: absolute; top: 40px; right: 250px; font-size: 20px; display: block; text-align: center; color: ${Colors.WHITE}; z-index: 100;`);
@@ -46,6 +47,13 @@ game_over_display.textContent = "GAME OVER";
 next_level_display.innerHTML = `World ${world}-${level}`;
 lives_counter.textContent = `x ${lives_remaining}`;
 time_counter.innerHTML = `Time<br>${time_remaining}`;
+
+body?.setAttribute(
+    "style",
+    (current_time_hour <= 6 || current_time_hour >= 18)
+    ? `background-image: ${level_props.bg_night_image};`
+    : `background-image: ${level_props.bg_image};`
+);
 
 document.body.appendChild(agent);
 document.body.appendChild(score_counter);
@@ -74,9 +82,8 @@ let jump_vy: number = -15;
 let agent_vx: number = 0;
 
 // entities
-const min_obstacle_gap: number = 100;
-const max_obstacle_gap: number = 200;
-const pipe_width: number = 50;
+let last_entity: HTMLElement | null = null;
+let second_last_entity: HTMLElement | null = null;
 const min_pipe_height: number = 50;
 
 let pipes_per_level: number = 20;   // the number of pipes that must cross the left edge of the screen
@@ -92,7 +99,7 @@ function initializeLevel(show_world_number_at_start: boolean = true): void {
     time_remaining = time_init;
     time_counter.innerHTML = `Time<br>${time_remaining}`;
 
-    document.getElementById("body")?.setAttribute(
+    body?.setAttribute(
         "style",
         (current_time_hour <= 6 || current_time_hour >= 18)
         ? `background-image: ${level_props.bg_night_image};`
@@ -106,6 +113,8 @@ function initializeLevel(show_world_number_at_start: boolean = true): void {
     });
     temporary_entity_ids = [];
     last_used_entity_id = 0;
+    last_entity = null;
+    second_last_entity = null;
 
     pipes_crossed = 0;
     entity_vx = -15;
@@ -166,53 +175,110 @@ function handleEntities(): void {
     });
 }
 
-function create_obstacle(): void {
-    const bottom_pipe: HTMLDivElement = document.createElement("div");
-    const top_pipe: HTMLDivElement = document.createElement("div");
-    bottom_pipe.id = create_entity_id();
-    top_pipe.id = create_entity_id();
+function handleEntityCreation(): void {
+    if (!last_entity) {
+        create_obstacle(0);
+        return;
+    }
+    
+    // get position of the farthest pipe
+    const last_entity_style: CSSStyleDeclaration = window.getComputedStyle(last_entity);
+    let second_last_entity_style: CSSStyleDeclaration | null = null;
+
+    if (second_last_entity) {
+        second_last_entity_style = window.getComputedStyle(second_last_entity);
+    }
+
+    let last_entity_left: number = pixel_val(last_entity_style.left) + pixel_val(last_entity_style.width);
+    let second_last_entity_left: number | null = null;
+    if (second_last_entity_style) {
+        second_last_entity_left = pixel_val(second_last_entity_style.left) + pixel_val(second_last_entity_style.width);
+    }
+
+    let farthest_left: number = (second_last_entity_left != null)
+                                ? Math.max(last_entity_left, second_last_entity_left)
+                                : last_entity_left;
+    
+    // determine whether to create new obstacle
+    if (farthest_left <= window.innerWidth) {
+        let horizontal_gap: number = rand_int(level_props.pipe_horizontal_gap[0], level_props.pipe_horizontal_gap[1]);
+        create_obstacle(horizontal_gap);
+    }
+}
+
+function create_obstacle(horizontal_gap: number): void {
+    // randomize the choice of creating top and bottom pipes
+    let should_create_top: boolean = level_props.has_top_pipe ? rand_int(1, 10) > 2 : false;
+    let should_create_bottom: boolean = level_props.has_bottom_pipe ? rand_int(1, 10) > 2 : false;
+
+    let bottom_pipe: HTMLDivElement | null = (should_create_bottom) ? document.createElement("div") : null;
+    if (bottom_pipe) {
+        bottom_pipe.id = create_entity_id();
+        last_entity = bottom_pipe;
+    }
+
+    let top_pipe: HTMLDivElement | null = null;
+    if (
+        (!level_props.is_topbottom_independent && should_create_bottom) ||
+        (level_props.is_topbottom_independent && should_create_top)
+    ) {
+        top_pipe = document.createElement("div");
+        top_pipe.id = create_entity_id();
+        last_entity = top_pipe;
+    }
+
+    // apply styling
+    let t_pipe_width: number = rand_int(level_props.pipe_width[0], level_props.pipe_width[1]);
+    let b_pipe_width: number = rand_int(level_props.pipe_width[0], level_props.pipe_width[1]);
 
     let window_width: number = window.innerWidth;
     let window_height: number = window.innerHeight;
-    let gap: number = rand_int(min_obstacle_gap, max_obstacle_gap);
+    let gap: number = rand_int(level_props.pipe_gap[0], level_props.pipe_gap[1]);
     let bp_top: number = rand_int(min_pipe_height + gap, window_height - min_pipe_height);
 
-    bottom_pipe.setAttribute(
-        "style",
-        `position: absolute;
-        top: ${bp_top}px;
-        left: ${window_width}px;
-        height: ${window_height - bp_top}px;
-        width: ${pipe_width}px;
-        background:
-            linear-gradient(to right,rgba(255,255,255,0.2), rgba(0,0,0,0.2)),
-            ${level_props.pipe_color};
-        border-radius: 10px 10px 0px 0px;
-        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
-    `);
-    top_pipe.setAttribute(
-        "style",
-        `position: absolute;
-        top: 0px;
-        left: ${window_width}px;
-        height: ${bp_top - gap}px;
-        width: ${pipe_width}px;
-        background:
-            linear-gradient(to right,rgba(255,255,255,0.2), rgba(0,0,0,0.2)),
-            ${level_props.pipe_color};
-        border-radius: 0px 0px 10px 10px;
-        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
-    `);
-    bottom_pipe.setAttribute("pipe_type", "bottom");
-    top_pipe.setAttribute("pipe_type", "top");
+    if (top_pipe) {
+        top_pipe.setAttribute(
+            "style",
+            `position: absolute;
+            top: 0px;
+            left: ${window_width + horizontal_gap}px;
+            height: ${bp_top - gap}px;
+            width: ${t_pipe_width}px;
+            background:
+                linear-gradient(to right,rgba(255,255,255,0.2), rgba(0,0,0,0.2)),
+                ${level_props.pipe_color};
+            border-radius: 0px 0px 10px 10px;
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+        `);    
+        top_pipe.setAttribute("pipe_type", "top");
+        document.body.appendChild(top_pipe);
+    }
 
-    document.body.appendChild(bottom_pipe);
-    document.body.appendChild(top_pipe);
+    if (bottom_pipe) {
+        bottom_pipe.setAttribute(
+            "style",
+            `position: absolute;
+            top: ${bp_top}px;
+            left: ${window_width + horizontal_gap}px;
+            height: ${window_height - bp_top}px;
+            width: ${b_pipe_width}px;
+            background:
+                linear-gradient(to right,rgba(255,255,255,0.2), rgba(0,0,0,0.2)),
+                ${level_props.pipe_color};
+            border-radius: 10px 10px 0px 0px;
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+        `);
+        bottom_pipe.setAttribute("pipe_type", "bottom");
+        document.body.appendChild(bottom_pipe);
+    }
 }
 
 function create_entity_id(): string {
-    const new_id: string = last_used_entity_id.toString();
+    if (last_used_entity_id > 0) {
+        second_last_entity = document.getElementById(last_used_entity_id.toString());
+    }
     last_used_entity_id += 1;
+    const new_id: string = last_used_entity_id.toString();
     temporary_entity_ids.push(new_id);
     return new_id;
 }
@@ -220,10 +286,8 @@ function create_entity_id(): string {
 function destroy_entity(id: string): void {
     const entity = document.getElementById(id);
     if (entity) {
-        if (entity.getAttribute("pipe_type") === "bottom") {
-            score += score_increment;
-            score_counter.innerHTML = `Score<br>${score}`;
-        }
+        score += score_increment;
+        score_counter.innerHTML = `Score<br>${score}`;
         entity.remove();
     }
     
@@ -275,6 +339,9 @@ function handleTimeTick(): void {
         entity_vx = 0;
     }
     handleEntities();
+    if (entity_vx !== 0) {
+        handleEntityCreation();
+    }
 
     if (agent_vy < terminal_speed) {
         agent_vy += agent_ay;
@@ -304,10 +371,6 @@ function handleClockTick(): void {
     if (is_paused || is_game_over) return;
     time_remaining--;
     time_counter.innerHTML = `Time<br>${time_remaining}`;
-
-    if (entity_vx !== 0) {
-        create_obstacle();
-    }
 }
 
 function set_gameover(): void {
