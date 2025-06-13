@@ -30,7 +30,7 @@ const score_increment = 10;
 const current_time_hour = new Date().getHours();
 let world = 1;
 let level = 1;
-const last_world = 1;
+const last_world = 4;
 const lives_init = 5;
 let lives_remaining = 5;
 let level_props = LevelDesignMap["W11"];
@@ -51,8 +51,8 @@ next_level_display.innerHTML = `World ${world}-${level}`;
 lives_counter.textContent = `x ${lives_remaining}`;
 time_counter.innerHTML = `Time<br>${time_remaining}`;
 body === null || body === void 0 ? void 0 : body.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
-    ? `background-image: ${level_props.bg_night_image};`
-    : `background-image: ${level_props.bg_image};`);
+    ? `background-color: ${level_props.bg_night_color};`
+    : `background-color: ${level_props.bg_color};`);
 document.body.appendChild(agent);
 document.body.appendChild(score_counter);
 document.body.appendChild(world_level_lbl);
@@ -89,8 +89,8 @@ function initializeLevel(show_world_number_at_start = true) {
     time_remaining = time_init;
     time_counter.innerHTML = `Time<br>${time_remaining}`;
     body === null || body === void 0 ? void 0 : body.setAttribute("style", (current_time_hour <= 6 || current_time_hour >= 18)
-        ? `background-image: ${level_props.bg_night_image};`
-        : `background-image: ${level_props.bg_image};`);
+        ? `background-color: ${level_props.bg_night_color};`
+        : `background-color: ${level_props.bg_color};`);
     world_level_lbl.innerHTML = `World<br>${world}-${level}`;
     temporary_entity_ids.forEach((id) => {
         const entity = document.getElementById(id);
@@ -256,6 +256,7 @@ function restart_game() {
     score = 0;
     score_counter.innerHTML = `Score<br>${score}`;
     game_over_display.style.display = "none";
+    game_over_display.textContent = "GAME OVER";
     is_game_over = false;
     is_paused = false;
 }
@@ -299,14 +300,18 @@ function handleTimeTick() {
         set_gameover();
     }
     if (pixel_val(agent.style.left) >= window.innerWidth) {
-        if (level < 4)
+        if (level < 4) {
             level++;
+            initializeLevel();
+        }
         else if (world < last_world) {
             world++;
-            pipes_per_level = world * 20;
+            pipes_per_level = 20 + (world * 5);
             level = 1;
+            initializeLevel();
         }
-        initializeLevel();
+        else
+            set_gameover(true);
     }
 }
 // handling elapsed time
@@ -316,8 +321,8 @@ function handleClockTick() {
     time_remaining--;
     time_counter.innerHTML = `Time<br>${time_remaining}`;
 }
-function set_gameover() {
-    if (lives_remaining > 0) {
+function set_gameover(has_won = false) {
+    if (lives_remaining > 0 && !has_won) {
         initializeLevel(false);
         is_paused = true;
         lives_display.style.display = "flex";
@@ -329,6 +334,9 @@ function set_gameover() {
             is_paused = false;
         }, 2000);
         return;
+    }
+    if (has_won) {
+        game_over_display.textContent = "YOU WIN!";
     }
     is_game_over = true;
     game_over_display.style.display = "flex";
